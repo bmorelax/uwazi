@@ -3,12 +3,15 @@ import elasticMapping from '../../../database/elastic_mapping';
 
 export default (elasticIndex, search) => ({
   resetIndex() {
-    return elastic.indices.delete({ index: elasticIndex, ignore_unavailable: true }).then(() =>
-      elastic.indices.create({
-        index: elasticIndex,
-        body: elasticMapping,
-      })
-    );
+    return elastic.indices
+      .delete({ index: elasticIndex, ignore_unavailable: true })
+      .then(() =>
+        elastic.indices.create({
+          index: elasticIndex,
+          body: elasticMapping,
+        })
+      )
+      .then(() => this.refresh());
   },
   reindex() {
     return this.resetIndex()
