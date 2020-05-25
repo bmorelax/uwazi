@@ -4,6 +4,7 @@ import db from 'api/utils/testing_db';
 import { propertyTypes } from 'shared/propertyTypes';
 import { validateEntity } from '../../../shared/types/entitySchema';
 import { customErrorMessages } from '../metadataValidators.js';
+import createError from 'api/utils/Error';
 import fixtures, { templateId, simpleTemplateId, nonExistentId } from './validatorFixtures';
 
 describe('entity schema', () => {
@@ -97,7 +98,10 @@ describe('entity schema', () => {
       };
     });
 
-    const testValid = () => validateEntity(entity);
+    const testValid = () =>
+      validateEntity(entity).catch(e => {
+        throw createError(e);
+      });
 
     const expectError = async (message, dataPath) => {
       await expect(validateEntity(entity)).rejects.toHaveProperty(
