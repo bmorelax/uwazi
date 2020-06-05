@@ -27,7 +27,7 @@ class Tenants {
   }
 
   async setupTenants() {
-    const model = await new TenantsModel();
+    const model = new TenantsModel();
     model.on('change', () => {
       this.updateTenants(model).catch(handleError);
     });
