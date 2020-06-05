@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { config } from 'api/config';
 import { TenantsModel } from './tenantsModel';
+import handleError from 'api/utils/handleError.js';
 
 export type Tenant = {
   name: string;
@@ -27,7 +28,9 @@ class Tenants {
 
   async setupTenants() {
     const model = await new TenantsModel();
-    model.on('change', () => this.updateTenants(model));
+    model.on('change', () => {
+      this.updateTenants(model).catch(handleError);
+    });
     await this.updateTenants(model);
   }
 

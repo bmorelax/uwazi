@@ -1,8 +1,6 @@
 import mongoose, { Connection } from 'mongoose';
 import { config } from 'api/config';
 
-import { tenants } from '../tenants/tenantContext';
-
 type dbAuth = {
   user: string;
   pass: string;

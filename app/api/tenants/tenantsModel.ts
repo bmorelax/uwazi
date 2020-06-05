@@ -2,9 +2,9 @@ import { EventEmitter } from 'events';
 import mongoose, { Model, Document } from 'mongoose';
 import { config } from 'api/config';
 import { DB } from 'api/odm/DB';
+import handleError from 'api/utils/handleError.js';
 
 import { Tenant } from './tenantContext';
-import { Db } from 'mongodb';
 
 const mongoSchema = new mongoose.Schema({
   name: String,
@@ -25,9 +25,12 @@ export class TenantsModel extends EventEmitter {
     this.model = tenantsDB.model('tenants', mongoSchema);
 
     const changeStrem = this.model.watch();
-    changeStrem.on('change', this.change.bind(this));
-    changeStrem.on('error', e => {
-      changeStrem.close();
+    changeStrem.on('change', () => {
+      this.change().catch(console.log);
+    });
+
+    changeStrem.on('error', () => {
+      changeStrem.close().catch(handleError);
     });
   }
 
