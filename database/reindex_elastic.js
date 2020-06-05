@@ -3,7 +3,7 @@ import request from '../app/shared/JSONRequest';
 import elasticMapping from './elastic_mapping';
 
 import { search } from '../app/api/search';
-import { tenants } from '../app/api/odm/tenantContext.ts';
+import { tenants } from '../app/api/tenants/tenantContext.ts';
 
 DB.connect().then(() => {
   tenants.run(async () => {

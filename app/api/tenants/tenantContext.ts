@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { config } from 'api/config';
+import { TenantsModel } from './tenantsModel';
 
 export type Tenant = {
   name: string;
@@ -19,7 +20,23 @@ class Tenants {
   tenants: { [k: string]: Tenant };
 
   constructor() {
-    this.tenants = {};
+    this.tenants = {
+      [this.defaultTenantName]: { name: this.defaultTenantName, ...config.defaultTenant },
+    };
+  }
+
+  async setupTenants() {
+    const model = await new TenantsModel();
+    model.on('change', () => this.updateTenants(model));
+    await this.updateTenants(model);
+  }
+
+  async updateTenants(model: TenantsModel) {
+    const tenants = await model.get();
+
+    tenants.forEach((tenant: Tenant) => {
+      this.add(tenant);
+    });
   }
 
   async run(cb: () => Promise<void>, tenantName?: string): Promise<void> {
@@ -41,10 +58,6 @@ class Tenants {
       throw new Error('tenant does not exists');
     }
     return this.tenants[tenantName];
-  }
-
-  addDefaultTenant() {
-    this.add({ name: this.defaultTenantName, ...config.defaultTenant });
   }
 
   add(tenant: Tenant) {
