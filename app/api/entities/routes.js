@@ -20,7 +20,7 @@ export default app => {
       })
       .then(template => thesauri.templateToThesauri(template, req.language, req.user))
       .then(templateTransformed => {
-        req.io.sockets.emit('thesauriChange', templateTransformed);
+        req.io.emitToCurrentTenant('thesauriChange', templateTransformed);
       })
       .catch(next)
   );
