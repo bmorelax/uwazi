@@ -5,6 +5,7 @@ import { DB } from 'api/odm/DB';
 import handleError from 'api/utils/handleError.js';
 
 import { Tenant } from './tenantContext';
+import { MongoError } from 'mongodb';
 
 const mongoSchema = new mongoose.Schema({
   name: String,
@@ -24,13 +25,19 @@ export class TenantsModel extends EventEmitter {
     const tenantsDB = DB.connectionForDB(config.SHARED_DB);
     this.model = tenantsDB.model('tenants', mongoSchema);
 
-    const changeStrem = this.model.watch();
-    changeStrem.on('change', () => {
-      this.change().catch(console.log);
+    const changeStream = this.model.watch();
+    changeStream.on('change', () => {
+      this.change().catch(handleError);
     });
 
-    changeStrem.on('error', () => {
-      changeStrem.close().catch(handleError);
+    changeStream.on('error', (error: MongoError) => {
+      //The $changeStream stage is only supported on replica sets
+      if (error.code === 40573) {
+        //@ts-ignore
+        changeStream.close();
+      } else {
+        handleError(error);
+      }
     });
   }
 
